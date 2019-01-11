@@ -3,7 +3,7 @@ from typing import List
 
 import numpy as np
 
-from activations import ActivationFunction
+import activations
 
 
 class NeuralNetwork():
@@ -11,7 +11,7 @@ class NeuralNetwork():
                  layers_size: int,
                  learning_rate=0.01,
                  batch_size=10,
-                 activation=ActivationFunction.SIGMOID,
+                 activation=activations.SIGMOID,
                  weights=None,
                  biaises=None):
         self.learning_rate = learning_rate
@@ -20,8 +20,8 @@ class NeuralNetwork():
         self.batch_size = batch_size
         self.activation = activation
         self._generate_weights = _generate_random
-        self._activation = activation.get()
-        self._activation_derivative = activation.get_derivative()
+        self._activation = activations.get(activation)
+        self._activation_derivative = activations.get_derivative(activation)
         self.weights = weights
         self.biases = biaises
 
@@ -115,12 +115,12 @@ class NeuralNetwork():
         """
         gradients = _create_array(self.number_layers + 1)
         cost_derivative = self._cost_derivative(a, y)
-        delta = cost_derivative
+        propagation = cost_derivative
 
         for k in range(self.number_layers, 0, -1):
             a_derivative = self._activation_derivative(z[k])
-            gradients[k] = delta * a_derivative
-            delta = np.dot(self.weights[k].T, gradients[k])
+            gradients[k] = propagation * a_derivative
+            propagation = np.dot(self.weights[k].T, gradients[k])
 
         gradients_b = _create_array(self.number_layers)
         gradients_w = _create_array(self.number_layers)

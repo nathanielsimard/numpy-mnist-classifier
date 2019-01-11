@@ -7,15 +7,15 @@ from data import mnist
 from nn import NeuralNetwork, save
 from regularization import EarlyStoppingRegularization
 from result import Result
-from activations import ActivationFunction
 
 
 def train(regularization=True):
     training_data, validation_data, test_data = mnist.load()
-    model = NeuralNetwork([784, 30, 10],
-                          batch_size=50,
-                          learning_rate=0.02,
-                          activation=ActivationFunction.SIGMOID)
+    model = NeuralNetwork(
+        [784, 30, 10],
+        batch_size=50,
+        learning_rate=0.02,
+    )
     result = Result(training_data, test_data)
 
     if regularization:
@@ -37,4 +37,4 @@ def train(regularization=True):
 
 
 if __name__ == "__main__":
-    train(False)
+    train()

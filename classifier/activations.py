@@ -2,16 +2,8 @@ from enum import Enum
 
 import numpy as np
 
-
-class ActivationFunction(Enum):
-    SIGMOID = 'sigmoid'
-    RELU = 'relu'
-
-    def get(self):
-        return _functions.get(self.name)[0]
-
-    def get_derivative(self):
-        return _functions.get(self.name)[1]
+SIGMOID = 'sigmoid'
+RELU = 'relu'
 
 
 def sigmoid(x) -> np.ndarray:
@@ -30,7 +22,13 @@ def relu_derivative(x) -> np.ndarray:
     return 1. * (x > 0)
 
 
-_functions = {
-    ActivationFunction.SIGMOID.name: (sigmoid, sigmoid_derivative),
-    ActivationFunction.RELU.name: (relu, relu_derivative)
-}
+def get(name: str):
+    return _functions[name]
+
+
+def get_derivative(name: str):
+    return _derivatives[name]
+
+
+_functions = {SIGMOID: sigmoid, RELU: relu}
+_derivatives = {SIGMOID: sigmoid_derivative, RELU: relu_derivative}
