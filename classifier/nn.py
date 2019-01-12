@@ -3,12 +3,12 @@ from typing import List
 
 import numpy as np
 
-import activations
+from . import activations
 
 
 class NeuralNetwork():
     def __init__(self,
-                 layers_size: int,
+                 layers_size: List[int],
                  learning_rate=0.01,
                  batch_size=10,
                  activation=activations.SIGMOID,
@@ -25,12 +25,12 @@ class NeuralNetwork():
         self.weights = weights
         self.biases = biaises
 
-        if (self.weights == None):
+        if (self.weights is None):
             self._initialize_weights(layers_size)
-        if (self.biases == None):
+        if (self.biases is None):
             self._initialize_biases(layers_size)
 
-    def train(self, data_set):
+    def train(self, data_set: List[np.ndarray]):
         """Train the neural network using multiple batches.
 
         Args:
@@ -59,12 +59,12 @@ class NeuralNetwork():
                 batch_gradients_w = self._initialize_batch(self.weights)
                 batch_gradients_b = self._initialize_batch(self.biases)
 
-    def test(self, data_set, print_result=False):
+    def test(self, data_set: List[np.ndarray], print_result=False):
         """Test the neural network on the input data set.
 
         Args:
             data_set: An array containing labeled data
-        Returns: 
+        Returns:
             losses: Sum of losses for each prediction
             accuracy: Missing predictions in percentage
         """
@@ -89,7 +89,7 @@ class NeuralNetwork():
 
         Args:
             input_data: A numpy array containing input data such as an image
-        Returns: 
+        Returns:
             z: An array containing each layers
             a: An array containing activations of each layer
         """
@@ -101,7 +101,9 @@ class NeuralNetwork():
             a[k] = self._activation(z[k])
         return z, a
 
-    def backward_propagation(self, z: List[np.ndarray], a: List[np.ndarray],
+    def backward_propagation(self,
+                             z: List[np.ndarray],
+                             a: List[np.ndarray],
                              y: np.ndarray):
         """Execute the backward propagation algorithm.
 
@@ -109,7 +111,7 @@ class NeuralNetwork():
             z: An array containing each layers
             a: An array containing activations of each layer
             y: A numpy array containing input data label
-        Returns: 
+        Returns:
             gradients_w: An array containing weights gradients for each layers
             gradients_b: An array containing biases gradients for each layers
         """
@@ -219,10 +221,10 @@ def load(file_name: str) -> NeuralNetwork:
 
 
 def _create_array(size):
-    """Create an array of the input size"""
+    """Create an array of the input size."""
     return [None] * (size)
 
 
 def _generate_random(shape) -> np.ndarray:
-    """ Generate random value between -1 and 1 with a mean of 0 """
+    """ Generate random value between -1 and 1 with a mean of 0."""
     return 2 * np.random.random(shape) - 1

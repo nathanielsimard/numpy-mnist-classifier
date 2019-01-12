@@ -1,6 +1,7 @@
 import gzip
 import os
 import pickle
+from typing import List
 
 import numpy as np
 import requests
@@ -8,7 +9,34 @@ import requests
 DATA_URL = 'http://deeplearning.net/data/mnist/mnist.pkl.gz'
 
 
-def load():
+class MNIST():
+    """The MNIST Data set."""
+
+    def __init__(self,
+                 training_data: List[np.ndarray],
+                 validation_data: List[np.ndarray],
+                 test_data: List[np.ndarray]):
+        """28x28 images flatten into numpy vectors 1x784.
+
+        Arguments:
+            training_data {List[np.ndarray]} -- training data composed of 50 000 images
+            validation_data {List[np.ndarray]} -- validation data composed of 10 000 images
+            test_data {List[np.ndarray]} -- test data compoased of 10 000 images
+        """
+        self.training_data = training_data
+        self.validation_data = validation_data
+        self.test_data = test_data
+
+
+def load() -> MNIST:
+    """Load MNIST data set.
+
+    Dowload the data set if not present localy
+
+    Returns:
+        MNIST -- All data
+
+    """
     print('Loading data ...')
     data_file = _open_data()
     training_data, validation_data, test_data = pickle.load(
@@ -27,23 +55,23 @@ def load():
     test_labels = __format_labels(test_data[1])
     test_data = (test_images, test_labels)
 
-    return training_data, validation_data, test_data
-
-
-def download_data():
-    print('Downloading data from {} ...'.format(DATA_URL))
-    if not os.path.exists(os.path.join(os.curdir, 'data/mnist.pkl.gz')):
-        response = requests.get(DATA_URL)
-        with open('data/mnist.pkl.gz', "wb") as file:
-            file.write(response.content)
-    return gzip.open('data/mnist.pkl.gz', 'rb')
+    return MNIST(training_data, validation_data, test_data)
 
 
 def _open_data():
     try:
         return gzip.open('data/mnist.pkl.gz', 'rb')
     except IOError:
-        return download_data()
+        return _download_data()
+
+
+def _download_data():
+    print('Downloading data from {} ...'.format(DATA_URL))
+    if not os.path.exists(os.path.join(os.curdir, 'data/mnist.pkl.gz')):
+        response = requests.get(DATA_URL)
+        with open('data/mnist.pkl.gz', "wb") as file:
+            file.write(response.content)
+    return gzip.open('data/mnist.pkl.gz', 'rb')
 
 
 def __format_labels(labels):
