@@ -1,7 +1,8 @@
+"""Collect the MNIST data set and make it available into training, validation and test data sets."""
 import gzip
 import os
 import pickle
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 import requests
@@ -13,15 +14,14 @@ class MNIST():
     """The MNIST Data set."""
 
     def __init__(self,
-                 training_data: List[np.ndarray],
-                 validation_data: List[np.ndarray],
-                 test_data: List[np.ndarray]):
-        """28x28 images flatten into numpy vectors 1x784.
+                 training_data: List[Tuple[np.ndarray, np.ndarray]],
+                 validation_data:  List[Tuple[np.ndarray, np.ndarray]],
+                 test_data:  List[Tuple[np.ndarray, np.ndarray]]):
+        """28x282 images flatten into numpy matrix 784x1.
 
-        Arguments:
-            training_data {List[np.ndarray]} -- training data composed of 50 000 images
-            validation_data {List[np.ndarray]} -- validation data composed of 10 000 images
-            test_data {List[np.ndarray]} -- test data compoased of 10 000 images
+        :param training_data: training data composed of 50 000 images
+        :param validation_data: validation data composed of 10 000 images
+        :param test_data: test data composed of 10 000 images
         """
         self.training_data = training_data
         self.validation_data = validation_data
@@ -29,13 +29,9 @@ class MNIST():
 
 
 def load() -> MNIST:
-    """Load MNIST data set.
+    """Download the data set if not present localy.
 
-    Dowload the data set if not present localy
-
-    Returns:
-        MNIST -- All data
-
+    :return: The MNIST Data Set
     """
     print('Loading data ...')
     data_file = _open_data()

@@ -1,5 +1,5 @@
 import pickle
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 
@@ -7,6 +7,18 @@ from . import activations
 
 
 class NeuralNetwork():
+    """Deep neural network that use batch training.
+
+    Example::
+        >>> model = NeuralNetwork([784, 30, 1])
+        >>> model.train(training_data)
+        >>> model.test(test_data)
+
+    .. note::
+        To train the model for a number of epochs you should call
+        ``model.train(training_data)`` multiple times
+    """
+
     def __init__(self,
                  layers_size: List[int],
                  learning_rate=0.01,
@@ -20,8 +32,8 @@ class NeuralNetwork():
         self.batch_size = batch_size
         self.activation = activation
         self._generate_weights = _generate_random
-        self._activation = activations.get(activation)
-        self._activation_derivative = activations.get_derivative(activation)
+        self._activation = activations.find(activation)
+        self._activation_derivative = activations.find_derivative(activation)
         self.weights = weights
         self.biases = biaises
 
@@ -30,11 +42,10 @@ class NeuralNetwork():
         if (self.biases is None):
             self._initialize_biases(layers_size)
 
-    def train(self, data_set: List[np.ndarray]):
-        """Train the neural network using multiple batches.
+    def train(self, data_set: List[Tuple[np.ndarray, np.ndarray]]):
+        """Train the neural network on input data and adjust it weights ans biaises.
 
-        Args:
-            data_set: An array containing labeled data
+        :param data_set: data used to train the neural network
         """
         batch_gradients_w = self._initialize_batch(self.weights)
         batch_gradients_b = self._initialize_batch(self.biases)
@@ -59,14 +70,11 @@ class NeuralNetwork():
                 batch_gradients_w = self._initialize_batch(self.weights)
                 batch_gradients_b = self._initialize_batch(self.biases)
 
-    def test(self, data_set: List[np.ndarray], print_result=False):
+    def test(self, data_set: List[Tuple[np.ndarray, np.ndarray]]) -> Tuple[float, float]:
         """Test the neural network on the input data set.
 
-        Args:
-            data_set: An array containing labeled data
-        Returns:
-            losses: Sum of losses for each prediction
-            accuracy: Missing predictions in percentage
+        :param data_set: The data that will be used to test the model
+        :return: Losses and accuracies
         """
         misses = 0
         total = 0
@@ -178,12 +186,12 @@ class NeuralNetwork():
             self.biases[i + 1] -= self.learning_rate * gradients_b[i]
 
 
+#    """Save the input model in pkl format
 def save(model: NeuralNetwork, file_name: str):
-    """Save the input model in pkl format
+    """Save the input model using pickle.
 
-    Args:
-        model: The neural network to save
-        file_name: Name of the file
+    :param model: The neural network to be saved
+    :param file_name: The path to pickle file
     """
     parameters = {
         'learning_rate': model.learning_rate,
@@ -199,13 +207,12 @@ def save(model: NeuralNetwork, file_name: str):
     file.close()
 
 
+#    """Load a neural network model.
 def load(file_name: str) -> NeuralNetwork:
     """Load a neural network model.
 
-    Args:
-        file_name: Name of the file
-    Returns:
-        model: A NeuralNetwork already initiazed or trained
+    :param file_name: The pickle file containing a saved neural networl
+    :return: The neural network already initialized or trained
     """
     file = open(file_name, 'rb')
     parameters = pickle.load(file)
@@ -221,10 +228,8 @@ def load(file_name: str) -> NeuralNetwork:
 
 
 def _create_array(size):
-    """Create an array of the input size."""
     return [None] * (size)
 
 
 def _generate_random(shape) -> np.ndarray:
-    """ Generate random value between -1 and 1 with a mean of 0."""
     return 2 * np.random.random(shape) - 1
