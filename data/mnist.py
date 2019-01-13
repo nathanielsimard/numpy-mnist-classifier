@@ -8,6 +8,8 @@ import numpy as np
 import requests
 
 DATA_URL = 'http://deeplearning.net/data/mnist/mnist.pkl.gz'
+OUT_DIR = '.mnist/'
+OUT_FILE = 'mnist.pkl.gz'
 
 
 class MNIST():
@@ -56,18 +58,18 @@ def load() -> MNIST:
 
 def _open_data():
     try:
-        return gzip.open('data/mnist.pkl.gz', 'rb')
+        return gzip.open(OUT_DIR + OUT_FILE, 'rb')
     except IOError:
         return _download_data()
 
 
 def _download_data():
     print('Downloading data from {} ...'.format(DATA_URL))
-    if not os.path.exists(os.path.join(os.curdir, 'data/mnist.pkl.gz')):
+    if not os.path.exists(os.path.join(os.curdir, OUT_DIR + OUT_FILE)):
         response = requests.get(DATA_URL)
-        with open('data/mnist.pkl.gz', "wb") as file:
+        with open(OUT_DIR + OUT_FILE, "wb") as file:
             file.write(response.content)
-    return gzip.open('data/mnist.pkl.gz', 'rb')
+    return gzip.open(OUT_DIR + OUT_FILE, 'rb')
 
 
 def __format_labels(labels):

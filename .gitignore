@@ -1,5 +1,5 @@
 # MNIST Data set
-mnist.pkl.gz
+.mnist/*
 
 # Saved models
 models/*
