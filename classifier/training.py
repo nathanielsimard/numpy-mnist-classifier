@@ -13,8 +13,9 @@ def train(model,
           training_data,
           test_data,
           epochs=1,
-          validation_data=[],
+          validation_data=([], []),
           early_stopping_regularization=False) -> Result:
+    """Train the model and return the result."""
     training = _create_training(model,
                                 training_data,
                                 test_data,
@@ -22,26 +23,15 @@ def train(model,
                                 epochs,
                                 early_stopping_regularization)
     trained_model = training.train()
-    return Result(training.result_collector, trained_model)
-
-
-def _create_training(model,
-                     training_data,
-                     test_data,
-                     validation_data,
-                     epochs,
-                     early_stopping_regularization) -> _Training:
-    if early_stopping_regularization:
-        return _EarlyStowGppingTraining(model,
-                                        training_data,
-                                        test_data,
-                                        validation_data,
-                                        epochs)
-    else:
-        return _BasicTraining(model,
-                              training_data,
-                              test_data,
-                              epochs)
+    return Result(training_data,
+                  test_data,
+                  validation_data,
+                  training.result_collector.training_accuracies,
+                  training.result_collector.test_accuracies,
+                  training.result_collector.training_losses,
+                  training.result_collector.test_losses,
+                  training.result_collector.epochs,
+                  trained_model)
 
 
 class _Training(abc.ABC):
@@ -49,7 +39,7 @@ class _Training(abc.ABC):
         self.model = model
         self.training_data = training_data
         self.test_data = test_data
-        self.result_collector = ResultCollector(training_data, test_data)
+        self.result_collector = ResultCollector()
 
     @abc.abstractmethod
     def train(self) -> nn.NeuralNetwork:
@@ -65,7 +55,6 @@ class _Training(abc.ABC):
 
 
 class _BasicTraining(_Training):
-    """Train a model on training data for a number of epochs."""
 
     def __init__(self,
                  model: nn.NeuralNetwork,
@@ -85,8 +74,6 @@ class _BasicTraining(_Training):
 
 
 class _EarlyStowGppingTraining(_Training):
-    """Train a model on the optimal number of epochs."""
-
     SAVED_MODEL_NAME_FORMAT = '/tmp/validation-epochs-{}.pkl'
 
     def __init__(self,
@@ -102,7 +89,6 @@ class _EarlyStowGppingTraining(_Training):
         self.max_steps_without_progression = max_steps_without_progression
 
     def train(self) -> nn.NeuralNetwork:
-        """Train a model and collect data."""
         current_epoch = 0
         optimal_epoch = 0
         current_steps_without_progression = 0
@@ -137,3 +123,26 @@ class _EarlyStowGppingTraining(_Training):
         model = nn.load(self.SAVED_MODEL_NAME_FORMAT.format(optimal_epoch))
         self._remove_saved_models()
         return model
+
+
+def _create_training(model,
+                     training_data,
+                     test_data,
+                     validation_data,
+                     epochs,
+                     early_stopping_regularization) -> _Training:
+    if early_stopping_regularization:
+
+        if len(validation_data[0]) == 0:
+            validation_data = test_data
+
+        return _EarlyStowGppingTraining(model,
+                                        training_data,
+                                        test_data,
+                                        validation_data,
+                                        epochs)
+    else:
+        return _BasicTraining(model,
+                              training_data,
+                              test_data,
+                              epochs)

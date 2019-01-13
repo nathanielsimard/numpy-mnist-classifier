@@ -6,10 +6,9 @@ from .nn import NeuralNetwork, save
 
 
 class ResultCollector():
+    """Collect data from model by running test on different data set."""
 
-    def __init__(self, training_data, test_data):
-        self.training_data = training_data
-        self.test_data = test_data
+    def __init__(self):
         self.training_accuracies = []
         self.test_accuracies = []
         self.training_losses = []
@@ -43,17 +42,11 @@ class ResultCollector():
 
 
 class Result():
-    """Collect data from model by running test on different data set.
-
-    Examples::
-        >>> result = Result(training_data, test_data)
-        >>> result.collect(model)
-        >>> result.plot('mnist-test-1')
-    """
+    """Produce a report containing training result."""
 
     FORMAT = '# Result'\
         + '\n'\
-        + '\nTraining the model for {0} epochs.'\
+        + '\nTrained the model for {0} epochs.'\
         + '\n'\
         + '\n## Model'\
         + '\n'\
@@ -68,6 +61,7 @@ class Result():
         + '\n'\
         + '\n- Training : {7}'\
         + '\n- Test : {8}'\
+        + '\n- Validation : {11}'\
         + '\n'\
         + '\n### Sample'\
         + '\n'\
@@ -84,24 +78,30 @@ class Result():
 
 
     def __init__(self,
-                 result_collector: ResultCollector,
+                 training_data,
+                 test_data,
+                 validation_data,
+                 training_accuracies,
+                 test_accuracies,
+                 training_losses,
+                 test_losses,
+                 epochs,
                  model: NeuralNetwork):
-        self.training_data = result_collector.training_data
-        self.test_data = result_collector.test_data
-        self.training_accuracies = result_collector.training_accuracies
-        self.test_accuracies = result_collector.test_accuracies
-        self.training_losses = result_collector.training_accuracies
-        self.test_losses = result_collector.test_losses
-        self.epochs = result_collector.epochs
+        self.training_data = training_data
+        self.test_data = test_data
+        self.validation_data = validation_data
+
+        self.training_accuracies = training_accuracies
+        self.training_losses = training_losses
+
+        self.test_accuracies = test_accuracies
+        self.test_losses = test_losses
+
+        self.epochs = epochs
         self.model = model
 
     def save(self, directory_name: str):
-        """Create an graph containing losses and accuracies.
-
-        All data collected with the collect function will be inclused in the graph
-
-        :param file_name: Path that will contain the graph in png format
-        """
+        """Produce a report containing training result."""
         os.system('mkdir -p {}'.format(directory_name))
         self._plot_accuracy()
         self._plot_losses()
@@ -126,9 +126,10 @@ class Result():
                                      len(self.training_data[0]),
                                      len(self.test_data[0]),
                                      self.model.learning_rate,
-                                     self.model.batch_size)
+                                     self.model.batch_size,
+                                     len(self.validation_data[0]))
         os.system('echo "{0}" > {1}/result.md'.format(content, directory_name))
-        save(self.model, '{}.model.pkl'.format(directory_name))
+        save(self.model, '{}/model.pkl'.format(directory_name))
 
     def _plot_sample(self, sample_data):
         columns = 8

@@ -186,7 +186,6 @@ class NeuralNetwork():
             self.biases[i + 1] -= self.learning_rate * gradients_b[i]
 
 
-#    """Save the input model in pkl format
 def save(model: NeuralNetwork, file_name: str):
     """Save the input model using pickle.
 

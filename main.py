@@ -4,16 +4,17 @@ from data import mnist
 
 
 def main():
-    """Create and train a neural network with no hidden layer using early stopping regularization."""
+    """Create and train a neural network using early stopping regularization."""
     data = mnist.load()
-    model = NeuralNetwork([784, 10], learning_rate=0.02, batch_size=100)
+    model = NeuralNetwork([784, 150, 10], learning_rate=0.01, batch_size=100)
 
     result = train(model,
                    data.training_data,
                    data.test_data,
                    validation_data=data.validation_data,
+                   epochs=2,
                    early_stopping_regularization=True)
-    result.save('models/mnist-1')
+    result.save('models/mnist-2')
 
 
 if __name__ == "__main__":
