@@ -1,5 +1,6 @@
 # MNIST Data set
 .mnist/*
+.tmp/*
 
 # Saved models
 models/*

@@ -9,17 +9,17 @@ def sigmoid(x: np.ndarray) -> np.ndarray:
     return 1.0 / (1.0 + np.exp(-x))
 
 
-def sigmoid_derivative(x) -> np.ndarray:
+def sigmoid_derivative(x: np.ndarray) -> np.ndarray:
     """Sigmoid derivative function."""
     return sigmoid(x) * (1 - sigmoid(x))
 
 
-def relu(x) -> np.ndarray:
+def relu(x: np.ndarray) -> np.ndarray:
     """Relu function."""
     return np.maximum(x, 0)
 
 
-def relu_derivative(x) -> np.ndarray:
+def relu_derivative(x: np.ndarray) -> np.ndarray:
     """Relu derivative function."""
     return 1. * (x > 0)
 

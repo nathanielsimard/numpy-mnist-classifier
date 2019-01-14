@@ -2,11 +2,11 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
+
 from .nn import NeuralNetwork, save
 
 
 class ResultCollector():
-    """Collect data from model by running test on different data set."""
 
     def __init__(self):
         self.training_accuracies = []
@@ -21,10 +21,7 @@ class ResultCollector():
                 test_accuracy,
                 training_loss,
                 training_accuracy):
-        """Collect loss and accuracy on trainind and test data set.
-
-        :param model: The model to be tested
-        """
+        """Collect data from model by running test on different data set."""
         print(
             '\n------------------ Neural Network Testing Result ------------------\n',
             '   - epoch {0} \n'.format(epoch),
@@ -42,11 +39,8 @@ class ResultCollector():
 
 
 class Result():
-    """Produce a report containing training result."""
 
     FORMAT = '# Result'\
-        + '\n'\
-        + '\nTrained the model for {0} epochs.'\
         + '\n'\
         + '\n## Model'\
         + '\n'\
@@ -54,6 +48,11 @@ class Result():
         + '\n- Activation : {6}'\
         + '\n- Learning Rate : {9}'\
         + '\n- Batch Size : {10}'\
+        + '\n'\
+        + '\n## Training'\
+        + '\n'\
+        + '\n- Method : {12}'\
+        + '\n- Epochs : {0}'\
         + '\n'\
         + '\n## Data'\
         + '\n'\
@@ -86,23 +85,22 @@ class Result():
                  training_losses,
                  test_losses,
                  epochs,
-                 model: NeuralNetwork):
+                 model: NeuralNetwork,
+                 training_method):
         self.training_data = training_data
         self.test_data = test_data
         self.validation_data = validation_data
-
         self.training_accuracies = training_accuracies
         self.training_losses = training_losses
-
         self.test_accuracies = test_accuracies
         self.test_losses = test_losses
-
         self.epochs = epochs
         self.model = model
+        self.training_method = training_method
 
     def save(self, directory_name: str):
         """Produce a report containing training result."""
-        os.system('mkdir -p {}'.format(directory_name))
+        os.makedirs(directory_name, exist_ok=True)
         self._plot_accuracy()
         self._plot_losses()
         plt.xlabel('Epoch')
@@ -113,8 +111,6 @@ class Result():
         self._plot_sample(self.test_data)
         plt.savefig(directory_name + '/sample.png')
         plt.close()
-
-        os.system('touch {}/result.md'.format(directory_name))
 
         content = self.FORMAT.format(self.epochs,
                                      self.training_accuracies[-1] * 100,
@@ -127,8 +123,12 @@ class Result():
                                      len(self.test_data[0]),
                                      self.model.learning_rate,
                                      self.model.batch_size,
-                                     len(self.validation_data[0]))
-        os.system('echo "{0}" > {1}/result.md'.format(content, directory_name))
+                                     len(self.validation_data[0]),
+                                     self.training_method)
+
+        with open(directory_name + '/result.md', 'w') as file:
+            file.write(content)
+
         save(self.model, '{}/model.pkl'.format(directory_name))
 
     def _plot_sample(self, sample_data):

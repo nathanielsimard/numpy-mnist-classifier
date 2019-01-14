@@ -1,6 +1,6 @@
--r common.txt
+-r basic.txt
 flake8
-mypy
+flake8-mypy
 pydocstyle
 autopep8
 rope

@@ -7,10 +7,10 @@ from . import activations
 
 
 class NeuralNetwork():
-    """Deep neural network that use batch training.
+    """Deep neural network using batch training.
 
     Example::
-        >>> model = NeuralNetwork([784, 30, 1])
+        >>> model = NeuralNetwork([784, 30, 10])
         >>> model.train(training_data)
         >>> model.test(test_data)
 
@@ -35,11 +35,11 @@ class NeuralNetwork():
         self._activation = activations.find(activation)
         self._activation_derivative = activations.find_derivative(activation)
         self.weights = weights
-        self.biases = biaises
+        self.biaises = biaises
 
         if (self.weights is None):
             self._initialize_weights(layers_size)
-        if (self.biases is None):
+        if (self.biaises is None):
             self._initialize_biases(layers_size)
 
     def train(self, data_set: List[Tuple[np.ndarray, np.ndarray]]):
@@ -48,7 +48,7 @@ class NeuralNetwork():
         :param data_set: data used to train the neural network
         """
         batch_gradients_w = self._initialize_batch(self.weights)
-        batch_gradients_b = self._initialize_batch(self.biases)
+        batch_gradients_b = self._initialize_batch(self.biaises)
 
         X = data_set[0]
         Y = data_set[1]
@@ -68,7 +68,7 @@ class NeuralNetwork():
                 self._apply_gradients(batch_gradients_w, batch_gradients_b)
 
                 batch_gradients_w = self._initialize_batch(self.weights)
-                batch_gradients_b = self._initialize_batch(self.biases)
+                batch_gradients_b = self._initialize_batch(self.biaises)
 
     def test(self, data_set: List[Tuple[np.ndarray, np.ndarray]]) -> Tuple[float, float]:
         """Test the neural network on the input data set.
@@ -92,20 +92,17 @@ class NeuralNetwork():
 
         return losses, accuracy
 
-    def forward_propagation(self, input_data: np.ndarray):
-        """Execute the foward propagation algorithm.
+    def forward_propagation(self, data: np.ndarray):
+        """Forward_propagation algorithms.
 
-        Args:
-            input_data: A numpy array containing input data such as an image
-        Returns:
-            z: An array containing each layers
-            a: An array containing activations of each layer
+        :param data: A numpy array containing input data such as an image
+        :return: (z, a) Each layer and activation
         """
         z = _create_array(self.number_layers + 1)
         a = _create_array(self.number_layers + 1)
-        a[0] = input_data
+        a[0] = data
         for k in range(1, self.number_layers + 1):
-            z[k] = np.dot(self.weights[k], a[k - 1]) + self.biases[k]
+            z[k] = np.dot(self.weights[k], a[k - 1]) + self.biaises[k]
             a[k] = self._activation(z[k])
         return z, a
 
@@ -113,15 +110,12 @@ class NeuralNetwork():
                              z: List[np.ndarray],
                              a: List[np.ndarray],
                              y: np.ndarray):
-        """Execute the backward propagation algorithm.
+        """Backward_propagation algorothm.
 
-        Args:
-            z: An array containing each layers
-            a: An array containing activations of each layer
-            y: A numpy array containing input data label
-        Returns:
-            gradients_w: An array containing weights gradients for each layers
-            gradients_b: An array containing biases gradients for each layers
+        :param z: An array containing each layer
+        :param a: An array containing activations of each layer
+        :param y: A numpy array containing data label
+        :return: (gradients_w, gradients_b) Computed weights and biaises gradients
         """
         gradients = _create_array(self.number_layers + 1)
         cost_derivative = self._cost_derivative(a, y)
@@ -155,10 +149,10 @@ class NeuralNetwork():
             preview = layer
 
     def _initialize_biases(self, layers_size):
-        self.biases = [None]  # B_0 does not exist
+        self.biaises = [None]  # B_0 does not exist
         for i in range(1, len(layers_size)):
             layer = layers_size[i]
-            self.biases.append(self._generate_weights((layer, 1)))
+            self.biaises.append(self._generate_weights((layer, 1)))
 
     def _lost(self, a, y):
         cost = self._cost(a, y)
@@ -183,7 +177,7 @@ class NeuralNetwork():
                          gradients_b: np.ndarray):
         for i in range(self.number_layers):
             self.weights[i + 1] -= self.learning_rate * gradients_w[i]
-            self.biases[i + 1] -= self.learning_rate * gradients_b[i]
+            self.biaises[i + 1] -= self.learning_rate * gradients_b[i]
 
 
 def save(model: NeuralNetwork, file_name: str):
@@ -199,31 +193,27 @@ def save(model: NeuralNetwork, file_name: str):
         'batch_size': model.batch_size,
         'activation_function': model.activation,
         'weights': model.weights,
-        'biases': model.biases
+        'biases': model.biaises
     }
-    file = open(file_name, 'wb')
-    pickle.dump(parameters, file)
-    file.close()
+    with open(file_name, 'wb') as file:
+        pickle.dump(parameters, file)
 
 
-#    """Load a neural network model.
 def load(file_name: str) -> NeuralNetwork:
     """Load a neural network model.
 
     :param file_name: The pickle file containing a saved neural networl
     :return: The neural network already initialized or trained
     """
-    file = open(file_name, 'rb')
-    parameters = pickle.load(file)
-    file.close()
-    model = NeuralNetwork(
-        parameters['layers_size'],
-        learning_rate=parameters['learning_rate'],
-        batch_size=parameters['batch_size'],
-        activation=parameters['activation_function'],
-        weights=parameters['weights'],
-        biaises=parameters['biases'])
-    return model
+    with open(file_name, 'rb') as file:
+        parameters = pickle.load(file)
+        return NeuralNetwork(
+            parameters['layers_size'],
+            learning_rate=parameters['learning_rate'],
+            batch_size=parameters['batch_size'],
+            activation=parameters['activation_function'],
+            weights=parameters['weights'],
+            biaises=parameters['biases'])
 
 
 def _create_array(size):

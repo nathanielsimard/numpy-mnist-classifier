@@ -1,20 +1,21 @@
-from classifier.nn import NeuralNetwork
-from classifier.training import train
+from classifier import nn, training
 from data import mnist
 
 
 def main():
-    """Create and train a neural network using early stopping regularization."""
-    data = mnist.load()
-    model = NeuralNetwork([784, 150, 10], learning_rate=0.01, batch_size=100)
+    """Create a Neural Network with one hidden layer."""
+    training_data, validation_data, test_data = mnist.load()
 
-    result = train(model,
-                   data.training_data,
-                   data.test_data,
-                   validation_data=data.validation_data,
-                   epochs=2,
-                   early_stopping_regularization=True)
-    result.save('models/mnist-2')
+    model = nn.NeuralNetwork([784, 100, 10], learning_rate=0.01, batch_size=50)
+
+    model_training = training.EarlyStoppingRegularization(model,
+                                                          training_data,
+                                                          validation_data,
+                                                          test_data,
+                                                          max_steps_without_progression=2)
+    result = model_training.train()
+
+    result.save('models/mnist')
 
 
 if __name__ == "__main__":
