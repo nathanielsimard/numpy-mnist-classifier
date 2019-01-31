@@ -82,7 +82,7 @@ class NeuralNetwork():
         for x, y in zip(data_set[0], data_set[1]):
             total += 1
             _, a = self.forward_propagation(x)
-            losses += self._lost(a, y)
+            losses += self._loss(a, y)
             prediction = np.argmax(a[self.number_layers])
             expected = np.argmax(y)
             if (prediction != expected):
@@ -118,7 +118,7 @@ class NeuralNetwork():
         :return: (gradients_w, gradients_b) Computed weights and biaises gradients
         """
         gradients = _create_array(self.number_layers + 1)
-        cost_derivative = self._cost_derivative(a, y)
+        cost_derivative = self._error_derivative(a, y)
         propagation = cost_derivative
 
         for k in range(self.number_layers, 0, -1):
@@ -154,16 +154,16 @@ class NeuralNetwork():
             layer = layers_size[i]
             self.biaises.append(self._generate_weights((layer, 1)))
 
-    def _lost(self, a, y):
-        cost = self._cost(a, y)
+    def _loss(self, a, y):
+        cost = self._error(a, y)
         return np.sum(cost)
 
-    def _cost(self, a, y):
+    def _error(self, a, y):
         prediction = a[self.number_layers]
         error = (prediction - y)
         return np.square(error)
 
-    def _cost_derivative(self, a, y):
+    def _error_derivative(self, a, y):
         prediction = a[self.number_layers]
         error = (prediction - y)
         return 2 * error
